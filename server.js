@@ -56,7 +56,7 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/cart-products', async (req, res) => {
   const q = 'CREATE TABLE IF NOT EXISTS carts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, amount INT NOT NULL, price DECIMAL(6, 2) NOT NULL, UID VARCHAR(36) NOT NULL, totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL)';
-  const q1 = 'CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(255) NOT NULL, description VARCHAR(255) NOT NULL, amount INT NOT NULL, price DECIMAL(6, 2) NOT NULL, customer_name VARCHAR(255) NOT NULL, customer_email VARCHAR(255) NOT NULL, customer_address VARCHAR(255) NOT NULL, customer_city VARCHAR(255) NOT NULL, customer_state VARCHAR(255) NOT NULL, customer_zip VARCHAR(255) NOT NULL, customer_country VARCHAR(255) NOT NULL, order_id VARCHAR(36) NOT NULL, totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL)';
+  const q1 = 'CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, product_name VARCHAR(255) NOT NULL, description VARCHAR(255) NOT NULL, amount INT NOT NULL, price DECIMAL(6, 2) NOT NULL, customer_name VARCHAR(255) NOT NULL, customer_email VARCHAR(255) DEFAULT example@example.com NOT NULL, customer_address VARCHAR(255) NOT NULL, customer_city VARCHAR(255) NOT NULL, customer_state VARCHAR(255) NOT NULL, customer_zip VARCHAR(255) NOT NULL, customer_country VARCHAR(255) NOT NULL, order_id VARCHAR(36) DEFAULT CURRENT_TIMESTAMP NOT NULL, totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL)';
   const q2 = 'SELECT * FROM carts';
 
   const connection = await main();
@@ -229,28 +229,11 @@ app.post('/api/checkout', async (req, res) => {
 });
 
 app.get('/api/orders', async (req, res) => {
-  const query = 'INSERT INTO orders (product_id, product_name, description, amount, price, customer_name, customer_email, customer_address, customer_city, customer_state, customer_zip, customer_country, order_id, totalAmount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  const values = [
-    '-',
-    '-',
-    '-',
-    0,
-    '0',
-    '-',
-    'example@example.com',
-    '-',
-    '-',
-    '-',
-    '------',
-    '---'
-  ];
   const q = 'SELECT * FROM orders';
 
   const connection = await main();
   
   try{
-    const [result] = await connection.execute(query, [...values, '----------', '0']);
-    console.log('Data inserted:', result);
     const [rows, fields] = await connection.execute(q);
     res.status(200).json({rows});
   } catch (err) {
