@@ -277,13 +277,8 @@ app.post('/api/orders', async (req, res) => {
   ];
 
   try {
-      if (orderId) {
-        const [result] = await connection.execute(query, [...values, orderId, totalAmount]);
-        console.log('Data inserted:', result);
-      } else {
-      const [result] = await connection.execute(query, [...values, uuidv4(), totalAmount]);
-      console.log('Data inserted:', result);
-    }
+    const [result] = await connection.execute(query, [...values, orderId ? orderId : uuidv4(), totalAmount]);
+    console.log('Data inserted:', result);
     
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
