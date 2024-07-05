@@ -229,11 +229,28 @@ app.post('/api/checkout', async (req, res) => {
 });
 
 app.get('/api/orders', async (req, res) => {
+  const query = 'INSERT INTO orders (product_id, product_name, description, amount, price, customer_name, customer_email, customer_address, customer_city, customer_state, customer_zip, customer_country, order_id, totalAmount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const values = [
+    '-',
+    '-',
+    '-',
+    0,
+    '0',
+    '-',
+    'example@example.com',
+    '-',
+    '-',
+    '-',
+    '------',
+    '---'
+  ];
   const q = 'SELECT * FROM orders';
 
   const connection = await main();
   
   try{
+    const [result] = await connection.execute(query, [...values, '----------', '0']);
+    console.log('Data inserted:', result);
     const [rows, fields] = await connection.execute(q);
     res.status(200).json({rows});
   } catch (err) {
