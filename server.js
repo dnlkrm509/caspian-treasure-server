@@ -1,5 +1,4 @@
 // server/server.js
-import fs from 'node:fs/promises';
 import cors from 'cors';
 import express from 'express';
 import Stripe from 'stripe';
@@ -15,15 +14,28 @@ const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //app.use(express.static('images'));
 app.use(express.json());
-app.use(cors());
 
+const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
+
+// Additional headers middleware
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // allow all domains
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+
 
 async function main() {
   const connection = await mysql.createConnection({
