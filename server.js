@@ -15,22 +15,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //app.use(express.static('images'));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Caspian Treasure API');
-});
-
 const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
+  origin: '*',
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type']
 }));
 
 // Additional headers middleware
@@ -52,6 +42,10 @@ async function main() {
 
   return connection;
 }
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Caspian Treasure API');
+});
 
 app.get('/products', async (req, res) => {
   const q1 = 'CREATE TABLE IF NOT EXISTS products (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, price DECIMAL(6, 2) NOT NULL)';
