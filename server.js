@@ -49,7 +49,7 @@ async function main() {
   return connection;
 }
 
-app.get('/api/products', async (req, res) => {
+app.get('/products', async (req, res) => {
   const q1 = 'CREATE TABLE IF NOT EXISTS products (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, price DECIMAL(6, 2) NOT NULL)';
   const q2 = 'SELECT * FROM products';
  
@@ -66,7 +66,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.get('/api/cart-products', async (req, res) => {
+app.get('/cart-products', async (req, res) => {
   const q = 'CREATE TABLE IF NOT EXISTS carts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, amount INT NOT NULL, price DECIMAL(6, 2) NOT NULL, UID VARCHAR(36) NOT NULL, totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL)';
   const q1 = `
   CREATE TABLE IF NOT EXISTS orders (
@@ -106,7 +106,7 @@ app.get('/api/cart-products', async (req, res) => {
 
 });
 
-app.post('/api/cart-products', async (req, res) => {
+app.post('/cart-products', async (req, res) => {
   const { newProduct, cart, totalAmount } = req.body;
 
   const connection = await main();
@@ -133,7 +133,7 @@ app.post('/api/cart-products', async (req, res) => {
   
 });
 
-app.put('/api/cart-products/:id', async (req, res) => {
+app.put('/cart-products/:id', async (req, res) => {
   const productId = req.params.id;
   const { newProduct, totalAmount } = req.body;
 
@@ -169,7 +169,7 @@ app.put('/api/cart-products/:id', async (req, res) => {
 
 });
 
-app.delete('/api/cart-products/:id', async (req, res) => {
+app.delete('/cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
   const connection = await main();
@@ -194,7 +194,7 @@ app.delete('/api/cart-products/:id', async (req, res) => {
    }
 })
 
-app.post('/api/message-from', async (req, res) => {
+app.post('/message-from', async (req, res) => {
   const { data } = req.body;
 
   const connection = await main();
@@ -223,7 +223,7 @@ const isValidEmail = (email) => {
   return re.test(email);
 };
 
-app.post('/api/checkout', async (req, res) => {
+app.post('/checkout', async (req, res) => {
   const { count, amount, name, email, address, city, state, zip, country, currency } = req.body;
 
   if (!isValidEmail(email) && count !== 0) {
@@ -259,7 +259,7 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
-app.get('/api/orders', async (req, res) => {
+app.get('/orders', async (req, res) => {
   const q = 'SELECT * FROM orders';
 
   const connection = await main();
@@ -276,7 +276,7 @@ app.get('/api/orders', async (req, res) => {
 
 });
 
-app.post('/api/orders', async (req, res) => {
+app.post('/orders', async (req, res) => {
   const {
     newProduct,
     orderId,
@@ -321,7 +321,7 @@ app.post('/api/orders', async (req, res) => {
   
 });
 
-app.delete('/api/all-cart-products/:id', async (req, res) => {
+app.delete('/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
   const connection = await main();
