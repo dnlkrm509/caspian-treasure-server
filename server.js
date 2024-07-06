@@ -15,6 +15,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //app.use(express.static('images'));
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the Caspian Treasure API');
+});
+
 const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
 
 app.use(cors({
