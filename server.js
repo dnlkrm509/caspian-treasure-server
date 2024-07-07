@@ -38,17 +38,19 @@ app.use((req, res, next) => {
 });
 
 
-function main() {
-  const pool = mysql.createPool({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE,
-    port: process.env.MYSQL_PORT,
-    connectionLimit: 20,  // Set an appropriate connection limit
-    queueLimit: 0
-  });
-
+let pool;
+function getPool() {
+  if (!pool) {
+    pool = mysql.createPool({
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+      port: process.env.MYSQL_PORT,
+      connectionLimit: 20,  // Set an appropriate connection limit
+      queueLimit: 0
+    });
+  }
   return pool;
 }
 
@@ -68,7 +70,7 @@ app.get('/api/products', async (req, res) => {
  
   let connection;
   try{
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     await connection.execute(q1);
     const [rows, fields] = await connection.execute(q2);
     res.status(200).json({rows});
@@ -119,7 +121,7 @@ app.get('/api/cart-products', async (req, res) => {
   let connection;
   
   try{
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     await connection.execute(q);
     await connection.execute(q1);
     const [rows, fields] = await connection.execute(q2);
@@ -160,7 +162,7 @@ app.post('/api/cart-products', async (req, res) => {
   ];
 
   try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     if (cart) {
       const [result] = await connection.execute(query, [...values, cart.UID, totalAmount]);
       console.log('Data inserted:', result);
@@ -192,7 +194,7 @@ app.put('/api/cart-products/:id', async (req, res) => {
   const q = 'SELECT * FROM carts';
 
   try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     if (newProduct) {
       const [result] = await connection.execute(query, [ newProduct.amount, totalAmount, productId ]);
       if (result.affectedRows === 0) {
@@ -229,7 +231,7 @@ app.delete('/api/cart-products/:id', async (req, res) => {
   const q2 = 'SELECT * FROM carts';
 
    try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
      const [result] = await connection.execute(q1, [productId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
@@ -265,7 +267,7 @@ app.post('/api/message-from', async (req, res) => {
   const values = [ data.subject, data.from_name, data.from_email, data.message ];
 
   try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     await connection.execute(q1);
     const [result] = await connection.execute(q2, values);
     console.log('Data inserted:', result);
@@ -329,7 +331,7 @@ app.get('/api/orders', async (req, res) => {
   let connection;
   
   try{
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     const [rows, fields] = await connection.execute(q);
     res.status(200).json({rows});
   } catch (err) {
@@ -392,7 +394,7 @@ app.post('/api/orders', async (req, res) => {
   ];
 
   try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     const [result] = await connection.execute(query, [...values, orderId ? orderId : uuidv4(), totalAmount]);
     console.log('Data inserted:', result);
     
@@ -469,7 +471,7 @@ app.post('/api/message-to', async (req, res) => {
   ];
 
   try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
     await connection.execute(q1);
     const [result] = await connection.execute(q2, values);
     console.log('Data inserted:', result);
@@ -495,7 +497,7 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
   const q2 = 'SELECT * FROM carts';
 
    try {
-    connection = await main().getConnection();
+    connection = await getPool().getConnection();
      const [result] = await connection.execute(q1, [productId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
