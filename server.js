@@ -55,7 +55,13 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/products', async (req, res) => {
-  const q1 = 'CREATE TABLE IF NOT EXISTS products (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, price DECIMAL(6, 2) NOT NULL)';
+  const q1 = `
+  CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description VARCHAR(255) NOT NULL,
+    price DECIMAL(6, 2) NOT NULL
+  )`;
   const q2 = 'SELECT * FROM products';
  
   const connection = await main();
@@ -72,7 +78,17 @@ app.get('/api/products', async (req, res) => {
 });
 
 app.get('/api/cart-products', async (req, res) => {
-  const q = 'CREATE TABLE IF NOT EXISTS carts (id INT AUTO_INCREMENT PRIMARY KEY, product_id INT NOT NULL, name VARCHAR(255) NOT NULL UNIQUE, description VARCHAR(255) NOT NULL, amount INT NOT NULL, price DECIMAL(6, 2) NOT NULL, UID VARCHAR(36) NOT NULL, totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL)';
+  const q = `
+  CREATE TABLE IF NOT EXISTS carts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description VARCHAR(255) NOT NULL,
+    amount INT NOT NULL,
+    price DECIMAL(6, 2) NOT NULL,
+    UID VARCHAR(36) NOT NULL,
+    totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL
+  )`;
   const q1 = `
   CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -116,8 +132,24 @@ app.post('/api/cart-products', async (req, res) => {
 
   const connection = await main();
 
-  const query = 'INSERT IGNORE INTO carts (product_id, name, description, amount, price, UID, totalAmount) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  const values = [ newProduct.product_id, newProduct.name, newProduct.description, newProduct.amount, newProduct.price ];
+  const query = `
+  INSERT IGNORE INTO carts (
+    product_id,
+    name,
+    description,
+    amount,
+    price,
+    UID,
+    totalAmount
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const values = [
+    newProduct.product_id,
+    newProduct.name,
+    newProduct.description,
+    newProduct.amount,
+    newProduct.price
+  ];
 
   try {
     if (cart) {
@@ -204,7 +236,14 @@ app.post('/api/message-from', async (req, res) => {
 
   const connection = await main();
 
-  const q1 = 'CREATE TABLE IF NOT EXISTS message_from (id INT AUTO_INCREMENT PRIMARY KEY, subject VARCHAR(255) NOT NULL, from_name VARCHAR(255) NOT NULL, from_email VARCHAR(255) NOT NULL, message VARCHAR(255) NOT NULL)';
+  const q1 = `
+  CREATE TABLE IF NOT EXISTS message_from (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(255) NOT NULL,
+    from_name VARCHAR(255) NOT NULL,
+    from_email VARCHAR(255) NOT NULL,
+    message VARCHAR(255) NOT NULL
+  )`;
   const q2 = 'INSERT INTO message_from (subject, from_name, from_email, message) VALUES (?, ?, ?, ?)';
   const values = [ data.subject, data.from_name, data.from_email, data.message ];
 
@@ -296,7 +335,24 @@ app.post('/api/orders', async (req, res) => {
 
   const connection = await main();
 
-  const query = 'INSERT INTO orders (product_id, product_name, description, amount, price, customer_name, customer_email, customer_address, customer_city, customer_state, customer_zip, customer_country, order_id, totalAmount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const query = `
+  INSERT INTO orders (
+    product_id,
+    product_name,
+    description,
+    amount,
+    price,
+    customer_name,
+    customer_email,
+    customer_address,
+    customer_city,
+    customer_state,
+    customer_zip,
+    customer_country,
+    order_id,
+    totalAmount
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const values = [
     newProduct.product_id,
     newProduct.name,
