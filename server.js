@@ -33,7 +33,7 @@ function getPool() {
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       port: process.env.MYSQL_PORT,
-      connectionLimit: 20,  // Set an appropriate connection limit
+      connectionLimit: 15,  // Set an appropriate connection limit
       queueLimit: 0
     });
   }
