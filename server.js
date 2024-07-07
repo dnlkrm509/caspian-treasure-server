@@ -326,6 +326,81 @@ app.post('/api/orders', async (req, res) => {
   
 });
 
+app.post('/api/message-to', async (req, res) => {
+  const { data } = req.body;
+  console.log(data);
+
+  const connection = await main();
+
+  const q1 = `
+  CREATE TABLE IF NOT EXISTS message_to (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(255) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL DEFAULT 'example@example.com',
+    order_id VARCHAR(36) NOT NULL DEFAULT '123',
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zip VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    product_id INT NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    amount INT NOT NULL,
+    price DECIMAL(6, 2) NOT NULL,
+    totalAmount DECIMAL(8, 2) NOT NULL DEFAULT 0
+  )`;
+
+  const q2 = `
+  INSERT INTO message_to (
+    subject,
+    customer_name,
+    email,
+    order_id,
+    address,
+    city,
+    state,
+    zip,
+    country,
+    product_id,
+    product_name,
+    amount,
+    price,
+    totalAmount
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const values = [
+    `Order Confirmation`,
+    data.name,
+    data.email,
+    data.orderId,
+    data.address,
+    data.city,
+    data.state,
+    data.zip,
+    `United Kingdom`,
+    data.productId,
+    data.productName,
+    data.amount,
+    data,price,
+    data.totalAmount
+  ];
+
+  try {
+    await connection.execute(q1);
+    const [result] = await connection.execute(q2, values);
+    console.log('Data inserted:', result);
+
+    res.status(200).json({ message: 'Message sent!' });
+  } catch (err) {
+    console.error('Error sending message:', err.stack);
+    res.status(500).json({ message: 'Failed to send message!' });
+  } finally {
+    await connection.end();
+  }
+  
+});
+
 app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
