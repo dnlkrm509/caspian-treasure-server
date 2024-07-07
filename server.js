@@ -123,10 +123,9 @@ async function initializeDatabase() {
     totalAmount DECIMAL(8, 2) NOT NULL DEFAULT 0
   )`;
   
-  const pool = main();
   let connection;
   try {
-    connection = await pool.getConnection();
+    connection = await getPool().getConnection();
     await connection.execute(q);
     await connection.execute(q1);
     await connection.execute(q2);
