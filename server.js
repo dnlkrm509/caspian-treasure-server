@@ -455,13 +455,12 @@ app.post('/api/message-to', async (req, res) => {
     city,
     state,
     zip,
-    productId,
+    product_id,
     productName,
     amount,
     price,
     totalAmount
   } = req.body;
-  console.log(req.body);
 
   let connection;
 
@@ -492,7 +491,7 @@ app.post('/api/message-to', async (req, res) => {
     city,
     state,
     zip,
-    productId,
+    product_id,
     productName,
     amount,
     price,
