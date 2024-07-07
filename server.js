@@ -447,8 +447,21 @@ app.post('/api/orders', async (req, res) => {
 });
 
 app.post('/api/message-to', async (req, res) => {
-  const { data } = req.body;
-  console.log(data);
+  const {
+    name,
+    email,
+    orderId,
+    address,
+    city,
+    state,
+    zip,
+    productId,
+    productName,
+    amount,
+    price,
+    totalAmount
+  } = req.body;
+  console.log(req.body);
 
   let connection;
 
@@ -472,19 +485,18 @@ app.post('/api/message-to', async (req, res) => {
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const values = [
     `Order Confirmation`,
-    data.name,
-    data.email,
-    data.orderId,
-    data.address,
-    data.city,
-    data.state,
-    data.zip,
-    `United Kingdom`,
-    data.productId,
-    data.productName,
-    data.amount,
-    data,price,
-    data.totalAmount
+    name,
+    email,
+    orderId,
+    address,
+    city,
+    state,
+    zip,
+    productId,
+    productName,
+    amount,
+    price,
+    totalAmount
   ];
 
   try {
