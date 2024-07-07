@@ -38,16 +38,18 @@ app.use((req, res, next) => {
 });
 
 
-async function main() {
-  const connection = await mysql.createConnection({
+function main() {
+  const pool = mysql.createPool({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE,
-    port: process.env.MYSQL_PORT
+    port: process.env.MYSQL_PORT,
+    connectionLimit: 20,  // Set an appropriate connection limit
+    queueLimit: 0
   });
 
-  return connection;
+  return pool;
 }
 
 app.get('/', (req, res) => {
@@ -64,8 +66,9 @@ app.get('/api/products', async (req, res) => {
   )`;
   const q2 = 'SELECT * FROM products';
  
-  const connection = await main();
+  let connection;
   try{
+    connection = await main().getConnection();
     await connection.execute(q1);
     const [rows, fields] = await connection.execute(q2);
     res.status(200).json({rows});
@@ -73,7 +76,9 @@ app.get('/api/products', async (req, res) => {
     console.error('Error fetching data:', err.stack);
     res.status(500).json({err});
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
@@ -111,9 +116,10 @@ app.get('/api/cart-products', async (req, res) => {
 
   const q2 = 'SELECT * FROM carts';
 
-  const connection = await main();
+  let connection;
   
   try{
+    connection = await main().getConnection();
     await connection.execute(q);
     await connection.execute(q1);
     const [rows, fields] = await connection.execute(q2);
@@ -122,7 +128,9 @@ app.get('/api/cart-products', async (req, res) => {
     console.error('Error fetching data:', err.stack);
     res.status(500).json({err});
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
 
 });
@@ -130,7 +138,7 @@ app.get('/api/cart-products', async (req, res) => {
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, cart, totalAmount } = req.body;
 
-  const connection = await main();
+  let connection;
 
   const query = `
   INSERT IGNORE INTO carts (
@@ -152,6 +160,7 @@ app.post('/api/cart-products', async (req, res) => {
   ];
 
   try {
+    connection = await main().getConnection();
     if (cart) {
       const [result] = await connection.execute(query, [...values, cart.UID, totalAmount]);
       console.log('Data inserted:', result);
@@ -165,7 +174,9 @@ app.post('/api/cart-products', async (req, res) => {
     console.error('Error inserting data:', err.stack);
     res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
   
 });
@@ -174,13 +185,14 @@ app.put('/api/cart-products/:id', async (req, res) => {
   const productId = req.params.id;
   const { newProduct, totalAmount } = req.body;
 
-  const connection = await main();
+  let connection;
 
   const query = 'UPDATE carts SET amount = ?, totalAmount = ? WHERE product_id = ?';
   const query1 = 'UPDATE carts SET totalAmount = ? WHERE product_id = ?';
   const q = 'SELECT * FROM carts';
 
   try {
+    connection = await main().getConnection();
     if (newProduct) {
       const [result] = await connection.execute(query, [ newProduct.amount, totalAmount, productId ]);
       if (result.affectedRows === 0) {
@@ -201,7 +213,9 @@ app.put('/api/cart-products/:id', async (req, res) => {
     console.error('Error updating data:', err.stack);
     res.status(500).json({ message: 'Internal Server Error' });
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
 
 });
@@ -209,12 +223,13 @@ app.put('/api/cart-products/:id', async (req, res) => {
 app.delete('/api/cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
-  const connection = await main();
+  let connection;
 
   const q1 = 'DELETE FROM carts WHERE product_id = ?';
   const q2 = 'SELECT * FROM carts';
 
    try {
+    connection = await main().getConnection();
      const [result] = await connection.execute(q1, [productId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
@@ -227,14 +242,16 @@ app.delete('/api/cart-products/:id', async (req, res) => {
      console.error('Error deleting data:', err.stack);
      res.status(500).json({ message: 'Internal Server Error' });
    } finally {
-     await connection.end();
+    if (connection) {
+      connection.release();
+    }
    }
 })
 
 app.post('/api/message-from', async (req, res) => {
   const { data } = req.body;
 
-  const connection = await main();
+  let connection;
 
   const q1 = `
   CREATE TABLE IF NOT EXISTS message_from (
@@ -248,6 +265,7 @@ app.post('/api/message-from', async (req, res) => {
   const values = [ data.subject, data.from_name, data.from_email, data.message ];
 
   try {
+    connection = await main().getConnection();
     await connection.execute(q1);
     const [result] = await connection.execute(q2, values);
     console.log('Data inserted:', result);
@@ -257,7 +275,9 @@ app.post('/api/message-from', async (req, res) => {
     console.error('Error sending message:', err.stack);
     res.status(500).json({ message: 'Failed to send message!' });
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
   
 });
@@ -306,16 +326,19 @@ app.post('/api/checkout', async (req, res) => {
 app.get('/api/orders', async (req, res) => {
   const q = 'SELECT * FROM orders';
 
-  const connection = await main();
+  let connection;
   
   try{
+    connection = await main().getConnection();
     const [rows, fields] = await connection.execute(q);
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching orders:', err.stack);
     res.status(500).json({err});
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
 
 });
@@ -333,7 +356,7 @@ app.post('/api/orders', async (req, res) => {
     country,
     totalAmount } = req.body;
 
-  const connection = await main();
+  let connection;
 
   const query = `
   INSERT INTO orders (
@@ -369,6 +392,7 @@ app.post('/api/orders', async (req, res) => {
   ];
 
   try {
+    connection = await main().getConnection();
     const [result] = await connection.execute(query, [...values, orderId ? orderId : uuidv4(), totalAmount]);
     console.log('Data inserted:', result);
     
@@ -377,7 +401,9 @@ app.post('/api/orders', async (req, res) => {
     console.error('Error inserting data:', err.stack);
     res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
   
 });
@@ -386,7 +412,7 @@ app.post('/api/message-to', async (req, res) => {
   const { data } = req.body;
   console.log(data);
 
-  const connection = await main();
+  let connection;
 
   const q1 = `
   CREATE TABLE IF NOT EXISTS message_to (
@@ -443,6 +469,7 @@ app.post('/api/message-to', async (req, res) => {
   ];
 
   try {
+    connection = await main().getConnection();
     await connection.execute(q1);
     const [result] = await connection.execute(q2, values);
     console.log('Data inserted:', result);
@@ -452,7 +479,9 @@ app.post('/api/message-to', async (req, res) => {
     console.error('Error sending message:', err.stack);
     res.status(500).json({ message: 'Failed to send message!' });
   } finally {
-    await connection.end();
+    if (connection) {
+      connection.release();
+    }
   }
   
 });
@@ -460,12 +489,13 @@ app.post('/api/message-to', async (req, res) => {
 app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
-  const connection = await main();
+  let connection;
 
   const q1 = 'DELETE FROM carts WHERE product_id = ?';
   const q2 = 'SELECT * FROM carts';
 
    try {
+    connection = await main().getConnection();
      const [result] = await connection.execute(q1, [productId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
@@ -478,7 +508,9 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
      console.error('Error deleting data:', err.stack);
      res.status(500).json({ message: 'Internal Server Error' });
    } finally {
-     await connection.end();
+    if (connection) {
+      connection.release();
+    }
    }
 })
 
