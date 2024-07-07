@@ -18,25 +18,10 @@ app.use(express.json());
 const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Additional headers middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://zingy-twilight-e56255.netlify.app');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
 
 
 let pool;
@@ -532,14 +517,6 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
     }
    }
 })
-
-// 404
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
-  res.status(404).json({ message: '404 - Not Found' });
-});
 
 initializeDatabase().then(() => {
   const PORT = process.env.PORT || 5000;
