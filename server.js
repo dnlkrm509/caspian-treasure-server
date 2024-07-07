@@ -36,8 +36,6 @@ function getPool() {
       ssl: {
         rejectUnauthorized: true
       },
-      connectionLimit: 15,  // Set an appropriate connection limit
-      queueLimit: 0
     });
   }
   return pool;
