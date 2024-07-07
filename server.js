@@ -55,38 +55,16 @@ function getPool() {
   return pool;
 }
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Caspian Treasure API');
-});
-
-app.get('/api/products', async (req, res) => {
-  const q1 = `
+async function initializeDatabase() {
+  const q = `
   CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(255) NOT NULL,
     price DECIMAL(6, 2) NOT NULL
   )`;
-  const q2 = 'SELECT * FROM products';
- 
-  let connection;
-  try{
-    connection = await getPool().getConnection();
-    await connection.execute(q1);
-    const [rows, fields] = await connection.execute(q2);
-    res.status(200).json({rows});
-  } catch (err) {
-    console.error('Error fetching data:', err.stack);
-    res.status(500).json({err});
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
-});
 
-app.get('/api/cart-products', async (req, res) => {
-  const q = `
+  const q1 = `
   CREATE TABLE IF NOT EXISTS carts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -97,7 +75,8 @@ app.get('/api/cart-products', async (req, res) => {
     UID VARCHAR(36) NOT NULL,
     totalAmount DECIMAL(8, 2) DEFAULT 0 NOT NULL
   )`;
-  const q1 = `
+
+  const q2 = `
   CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -114,18 +93,84 @@ app.get('/api/cart-products', async (req, res) => {
     customer_country VARCHAR(255) NOT NULL,
     order_id VARCHAR(36) NOT NULL DEFAULT '123',
     totalAmount DECIMAL(8, 2) NOT NULL DEFAULT 0
-  );
-`;
+  )`;
 
-  const q2 = 'SELECT * FROM carts';
+  const q3 = `
+  CREATE TABLE IF NOT EXISTS message_from (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(255) NOT NULL,
+    from_name VARCHAR(255) NOT NULL,
+    from_email VARCHAR(255) NOT NULL,
+    message VARCHAR(255) NOT NULL
+  )`;
+
+  const q4 = `
+  CREATE TABLE IF NOT EXISTS message_to (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(255) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL DEFAULT 'example@example.com',
+    order_id VARCHAR(36) NOT NULL DEFAULT '123',
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zip VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    product_id INT NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    amount INT NOT NULL,
+    price DECIMAL(6, 2) NOT NULL,
+    totalAmount DECIMAL(8, 2) NOT NULL DEFAULT 0
+  )`;
+  
+  const pool = main();
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.execute(q);
+    await connection.execute(q1);
+    await connection.execute(q2);
+    await connection.execute(q3);
+    await connection.execute(q4);
+  } catch (err) {
+    console.error('Error initializing database:', err.stack);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+}
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Caspian Treasure API');
+});
+
+app.get('/api/products', async (req, res) => {  
+  const q = 'SELECT * FROM products';
+ 
+  let connection;
+  try{
+    connection = await getPool().getConnection();
+    const [rows, fields] = await connection.execute(q);
+    res.status(200).json({rows});
+  } catch (err) {
+    console.error('Error fetching data:', err.stack);
+    res.status(500).json({err});
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+});
+
+app.get('/api/cart-products', async (req, res) => {
+  const q = 'SELECT * FROM carts';
 
   let connection;
   
   try{
     connection = await getPool().getConnection();
-    await connection.execute(q);
-    await connection.execute(q1);
-    const [rows, fields] = await connection.execute(q2);
+    const [rows, fields] = await connection.execute(q);
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching data:', err.stack);
@@ -256,21 +301,13 @@ app.post('/api/message-from', async (req, res) => {
 
   let connection;
 
-  const q1 = `
-  CREATE TABLE IF NOT EXISTS message_from (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    subject VARCHAR(255) NOT NULL,
-    from_name VARCHAR(255) NOT NULL,
-    from_email VARCHAR(255) NOT NULL,
-    message VARCHAR(255) NOT NULL
-  )`;
-  const q2 = 'INSERT INTO message_from (subject, from_name, from_email, message) VALUES (?, ?, ?, ?)';
+  
+  const q = 'INSERT INTO message_from (subject, from_name, from_email, message) VALUES (?, ?, ?, ?)';
   const values = [ data.subject, data.from_name, data.from_email, data.message ];
 
   try {
     connection = await getPool().getConnection();
-    await connection.execute(q1);
-    const [result] = await connection.execute(q2, values);
+    const [result] = await connection.execute(q, values);
     console.log('Data inserted:', result);
 
     res.status(200).json({ message: 'Message sent!' });
@@ -417,26 +454,7 @@ app.post('/api/message-to', async (req, res) => {
 
   let connection;
 
-  const q1 = `
-  CREATE TABLE IF NOT EXISTS message_to (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    subject VARCHAR(255) NOT NULL,
-    customer_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL DEFAULT 'example@example.com',
-    order_id VARCHAR(36) NOT NULL DEFAULT '123',
-    address VARCHAR(255) NOT NULL,
-    city VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
-    zip VARCHAR(255) NOT NULL,
-    country VARCHAR(255) NOT NULL,
-    product_id INT NOT NULL,
-    product_name VARCHAR(255) NOT NULL,
-    amount INT NOT NULL,
-    price DECIMAL(6, 2) NOT NULL,
-    totalAmount DECIMAL(8, 2) NOT NULL DEFAULT 0
-  )`;
-
-  const q2 = `
+  const q = `
   INSERT INTO message_to (
     subject,
     customer_name,
@@ -473,8 +491,7 @@ app.post('/api/message-to', async (req, res) => {
 
   try {
     connection = await getPool().getConnection();
-    await connection.execute(q1);
-    const [result] = await connection.execute(q2, values);
+    const [result] = await connection.execute(q, values);
     console.log('Data inserted:', result);
 
     res.status(200).json({ message: 'Message sent!' });
@@ -525,14 +542,16 @@ app.use((req, res, next) => {
   res.status(404).json({ message: '404 - Not Found' });
 });
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Please use a different port.`);
-    process.exit(1);
-  } else {
-    console.error('Server error:', err);
-  }
+initializeDatabase().then(() => {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Please use a different port.`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
 });
