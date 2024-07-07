@@ -9,21 +9,6 @@ import mysql from 'mysql2/promise';
 // Configure dotenv immediately after importing
 dotenv.config();
 
-
-const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-//app.use(express.static('images'));
-app.use(express.json());
-
-const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
-
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-
 let pool;
 function getPool() {
   if (!pool) {
@@ -36,10 +21,38 @@ function getPool() {
       ssl: {
         rejectUnauthorized: true
       },
+      connectionLimit: 35,  // Set an appropriate connection limit
+      queueLimit: 0
     });
   }
   return pool;
 }
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+//app.use(express.static('images'));
+app.use(express.json());
+
+const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', allowedOrigins.join(','));
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 async function initializeDatabase() {
   const q = `
