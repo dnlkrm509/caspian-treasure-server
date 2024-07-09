@@ -33,7 +33,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //app.use(express.static('images'));
 app.use(express.json());
 
-const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
+const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app', 'https://js.stripe.com', 'https://emailjs.com'];
 
 app.use(cors({
   origin: function (origin, callback) {
