@@ -33,9 +33,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //app.use(express.static('images'));
 app.use(express.json());
 
-const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app', 'https://js.stripe.com', 'https://emailjs.com'];
+const allowedOrigins = ['https://zingy-twilight-e56255.netlify.app'];
 
-const options = {
+app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -46,11 +46,9 @@ const options = {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}
-
-app.use(cors());
+}));
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', allowedOrigins.join(','));
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
