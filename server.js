@@ -81,7 +81,7 @@ async function initializeDatabase() {
     product_id INT NOT NULL,
     user_id INT NOT NULL,
     amount INT NOT NULL,
-    totalAmount Decimal(7. 2) DEFAULT 0,
+    totalAmount Decimal(7, 2) DEFAULT 0,
     FOREIGN KEY(product_id) REFERENCES products(id),
     FOREIGN KEY(user_id) REFERENCES users(id),
     PRIMARY KEY(product_id, user_id)
@@ -91,20 +91,25 @@ async function initializeDatabase() {
   CREATE TABLE IF NOT EXISTS customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCE users(id)
+    FOREIGN KEY(user_id) REFERENCES users(id)
   )`;
 
   const q4 = `
   CREATE TABLE IF NOT EXISTS orders (
-    order_id VARCHAR(36) NOT NULL DEFAULT '123',
+    id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
-    product_id INT NOT NULL,
-    FOREIGN KEY(customer_id) REFERENCE customers(id),
-    FOREIGN KEY(product_id) REFERENCE products(id),
-    PRIMARY KEY(product_id, customer_id, order_id)
+    FOREIGN KEY(customer_id) REFERENCES customers(id)
   )`;
 
   const q5 = `
+  CREATE TABLE IF NOT EXISTS order_detail (
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    FOREIGN KEY(order_id) REFERENCES orders(id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )`;
+
+  const q6 = `
   CREATE TABLE IF NOT EXISTS message_from (
     id INT AUTO_INCREMENT PRIMARY KEY,
     subject VARCHAR(255) NOT NULL,
@@ -113,7 +118,7 @@ async function initializeDatabase() {
     message VARCHAR(255) NOT NULL
   )`;
 
-  const q6 = `
+  const q7 = `
   CREATE TABLE IF NOT EXISTS message_to (
     subject VARCHAR(255) NOT NULL,
     customer_id INT NOT NULL,
@@ -133,6 +138,7 @@ async function initializeDatabase() {
     await connection.execute(q4);
     await connection.execute(q5);
     await connection.execute(q6);
+    await connection.execute(q7);
   } catch (err) {
     console.error('Error initializing database:', err.stack);
   } finally {
@@ -166,7 +172,9 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/cart-products', async (req, res) => {
   const q = `
-  SELECT *
+  SELECT users.id as userID,
+    products.id, products.name, products.descrition, products.price,
+    carts.amount, carts.totalAmount
     FROM carts
     INNER JOIN users ON
     carts.user_id = users.id
