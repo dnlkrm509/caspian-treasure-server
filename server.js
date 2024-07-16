@@ -173,14 +173,7 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/cart-products', async (req, res) => {
   const q = `
-  SELECT users.id as userID,
-    products.id, products.name, products.description, products.price,
-    carts.amount, carts.totalAmount
-    FROM carts
-    INNER JOIN users ON
-    carts.user_id = users.id
-    INNER JOIN products ON
-    carts.product_id = products.id
+  SELECT * FROM carts
   `;
 
   let connection;
