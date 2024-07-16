@@ -282,7 +282,7 @@ app.post('/api/cart-products', async (req, res) => {
   VALUES (?, ?, ?, ?)`;
   const values = [
     userId,
-    newProduct.length > 0 ? newProduct.product_id : 1,
+    newProduct.length > 0 ? newProduct.product_id : 8,
     newProduct.length > 0 ? newProduct.amount : 0,
     totalAmount
   ];
