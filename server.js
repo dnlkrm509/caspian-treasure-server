@@ -73,7 +73,7 @@ async function initializeDatabase() {
     city VARCHAR(255) NOT NULL,
     state VARCHAR(255) NOT NULL,
     zip VARCHAR(255) NOT NULL,
-    country VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL
   )`;
 
   const q2 = `
