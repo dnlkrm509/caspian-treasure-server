@@ -200,6 +200,26 @@ app.get('/api/cart-products', async (req, res) => {
 
 });
 
+app.get('/api/users', async (req, res) => {
+  const q = 'SELECT * FROM users';
+
+  let connection;
+  
+  try{
+    connection = await getPool().getConnection();
+    const [rows, fields] = await connection.execute(q);
+    res.status(200).json({rows});
+  } catch (err) {
+    console.error('Error fetching users:', err.stack);
+    res.status(500).json({err});
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+
+});
+
 app.post('/api/add-user', async (req, res) => {
   const { name, password, email, address, city, state, zip, country } = req.body;
 
