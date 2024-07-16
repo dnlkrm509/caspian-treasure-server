@@ -234,7 +234,7 @@ app.post('/api/add-user', async (req, res) => {
     city,
     state,
     zip,
-    country,
+    country
   )
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
   const userValues = [
