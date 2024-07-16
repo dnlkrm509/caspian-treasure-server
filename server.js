@@ -284,7 +284,7 @@ app.post('/api/cart-products', async (req, res) => {
     userId,
     newProduct.length > 0 ? newProduct.product_id : 0,
     newProduct.length > 0 ? newProduct.amount : 0,
-    totalAmount ? totalAmount : '0.00'
+    totalAmount
   ];
 
   try {
