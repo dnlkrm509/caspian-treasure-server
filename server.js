@@ -220,7 +220,7 @@ app.get('/api/users', async (req, res) => {
 
 });
 
-app.post('/api/user', async (req, res) => {
+app.post('/api/users', async (req, res) => {
   const { name, password, email, address, city, state, zip, country } = req.body;
 
   let connection;
