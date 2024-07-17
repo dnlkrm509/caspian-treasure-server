@@ -273,7 +273,7 @@ app.post('/api/cart-products', async (req, res) => {
   let connection;
   
   const query = `
-  INSERT INTO carts (
+  INSERT IGNORE INTO carts (
     user_id,
     product_id,
     amount,
