@@ -271,27 +271,35 @@ app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
   let connection;
-  
+
+  const productData = newProduct && newProduct.length > 0 ?
+  newProduct : { product_id: 8, amount: 0 };
+
   const query = `
-  INSERT IGNORE INTO carts (
-    user_id,
-    product_id,
-    amount,
-    totalAmount
-  )
-  VALUES (?, ?, ?, ?)`;
+    INSERT INTO carts (
+      user_id,
+      product_id,
+      amount,
+      total_amount
+    )
+    VALUES (?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      amount = VALUES(amount),
+      total_amount = VALUES(total_amount)`;
+
   const values = [
-    newProduct.length > 0 ? newProduct.product_id : 8,
-    newProduct.length > 0 ? newProduct.amount : 0,
+    userId || user.id,
+    productData.product_id,
+    productData.amount,
     totalAmount
   ];
 
   try {
     connection = await getPool().getConnection();
-    
-    const [result] = await connection.execute(query, [userId ? userId : user.id, ...values]);
+
+    const [result] = await connection.execute(query, values);
     console.log('Data inserted:', result);
-    
+
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
     console.error('Error inserting data:', err.stack);
@@ -301,7 +309,6 @@ app.post('/api/cart-products', async (req, res) => {
       connection.release();
     }
   }
-  
 });
 
 app.put('/api/cart-products/:id', async (req, res) => {
