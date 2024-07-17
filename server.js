@@ -273,8 +273,8 @@ app.post('/api/cart-products', async (req, res) => {
   let connection;
 
   const userIdValue = userId ? userId : user.id;
-  const productIdValue = newProduct?.product_id ? productData.product_id : 8;
-  const amountValue = newProduct?.amount ? productData.amount : 0;
+  const productIdValue = newProduct?.product_id ? newProduct.product_id : 8;
+  const amountValue = newProduct?.amount ? newProduct.amount : 0;
   const totalAmountValue = totalAmount;
 
   
