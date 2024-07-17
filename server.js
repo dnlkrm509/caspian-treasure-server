@@ -280,32 +280,15 @@ app.post('/api/cart-products', async (req, res) => {
   const amountValue = productData.amount;
   const totalAmountValue = totalAmount;
 
+  const insertQuery = `
+      INSERT INTO carts (user_id, product_id, amount, totalAmount)
+      VALUES (?, ?, ?, ?)`;
+
   try {
     connection = await getPool().getConnection();
+    console.log('new item')
     
-    // Check if the product already exists in the user's cart
-    const [existing] = await connection.execute(
-      `SELECT COUNT(*) AS count FROM carts WHERE user_id = ? AND product_id = ?`,
-      [userIdValue, productIdValue]
-    );
-
-    if (existing[0].count > 0) {
-      console.log(existing)
-      // Update the existing cart item
-      const updateQuery = `
-        UPDATE carts
-        SET amount = ?, totalAmount = ?
-        WHERE user_id = ? AND product_id = ?`;
-      await connection.execute(updateQuery, [amountValue, totalAmountValue, userIdValue, productIdValue]);
-    } else {
-      console.log('new item')
-      // Insert the new cart item
-      const insertQuery = `
-        INSERT INTO carts (user_id, product_id, amount, totalAmount)
-        VALUES (?, ?, ?, ?)`;
-      await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
-    }
-
+    await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
     console.error('Error inserting data:', err.stack);
