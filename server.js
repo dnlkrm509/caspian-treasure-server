@@ -271,13 +271,10 @@ app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
   let connection;
-
-  // Ensure newProduct is an object even if it's empty
-  const productData = newProduct && newProduct.length > 0 ? newProduct : { product_id: 8, amount: 0 };
-
-  const userIdValue = userId || user.id;
-  const productIdValue = productData.product_id;
-  const amountValue = productData.amount;
+  
+  const userIdValue = userId ? userId : user.id;
+  const productIdValue = productData.product_id ? productData.product_id : 8;
+  const amountValue = productData.amount ? productData.amount : 0;
   const totalAmountValue = totalAmount;
 
   
