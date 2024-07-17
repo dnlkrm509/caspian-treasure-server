@@ -313,6 +313,7 @@ app.put('/api/cart-products/:id', async (req, res) => {
     carts.user_id = users.id
     INNER JOIN products ON
     carts.product_id = products.id
+    WHERE carts.user_id = ?
   `;
 
   try {
@@ -360,6 +361,7 @@ app.delete('/api/cart-products/:id', async (req, res) => {
     carts.user_id = users.id
     INNER JOIN products ON
     carts.product_id = products.id
+    WHERE carts.user_id = ?
   `;
 
    try {
@@ -370,7 +372,7 @@ app.delete('/api/cart-products/:id', async (req, res) => {
      }  
 
      console.log('Data deleted:', result);
-     const [rows, fields] = await connection.execute(q2);
+     const [rows, fields] = await connection.execute(q2, [userId]);
      res.status(200).json({rows});
    } catch (err) {
      console.error('Error deleting data:', err.stack);
