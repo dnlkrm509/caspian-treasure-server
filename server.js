@@ -312,7 +312,16 @@ app.put('/api/cart-products/:id', async (req, res) => {
 
   const query = 'UPDATE carts SET amount = ?, totalAmount = ? WHERE product_id = ? AND user_id = ?';
   const query1 = 'UPDATE carts SET totalAmount = ? WHERE product_id = ? AND user_id = ?';
-  const q = 'SELECT * FROM carts WHERE user_id = ?';
+  const q = `
+  SELECT users.id as userID,
+    products.id, products.name, products.description, products.price,
+    carts.amount, carts.totalAmount
+    FROM carts
+    INNER JOIN users ON
+    carts.user_id = users.id
+    INNER JOIN products ON
+    carts.product_id = products.id
+  `;
 
   try {
     connection = await getPool().getConnection();
