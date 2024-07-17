@@ -290,7 +290,7 @@ app.post('/api/cart-products', async (req, res) => {
     );
 
     if (existing[0].count > 0) {
-      console.log('existing')
+      console.log(existing)
       // Update the existing cart item
       const updateQuery = `
         UPDATE carts
