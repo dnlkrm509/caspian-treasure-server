@@ -174,7 +174,7 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/cart-products', async (req, res) => {
   const q = `
   SELECT users.id as userID,
-    products.id, products.name, products.description, products.price,
+    products.id as product_id, products.name, products.description, products.price,
     carts.amount, carts.totalAmount
     FROM carts
     INNER JOIN users ON
@@ -314,7 +314,7 @@ app.put('/api/cart-products/:id', async (req, res) => {
   const query1 = 'UPDATE carts SET totalAmount = ? WHERE product_id = ? AND user_id = ?';
   const q = `
   SELECT users.id as userID,
-    products.id, products.name, products.description, products.price,
+    products.id as product_id, products.name, products.description, products.price,
     carts.amount, carts.totalAmount
     FROM carts
     INNER JOIN users ON
