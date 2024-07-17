@@ -277,9 +277,6 @@ app.post('/api/cart-products', async (req, res) => {
   const amountValue = newProduct?.amount ? newProduct.amount : 0;
   const totalAmountValue = totalAmount;
 
-  
-  console.log(productIdValue, amountValue, userIdValue, user, totalAmountValue)
-
   const insertQuery = `
       INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
       VALUES (?, ?, ?, ?)`;
@@ -349,15 +346,25 @@ app.put('/api/cart-products/:id', async (req, res) => {
 
 app.delete('/api/cart-products/:id', async (req, res) => {
   const productId = req.params.id;
+  const { userId } = req.body;
 
   let connection;
 
-  const q1 = 'DELETE FROM carts WHERE product_id = ?';
-  const q2 = 'SELECT * FROM carts';
+  const q1 = 'DELETE FROM carts WHERE product_id = ? AND product_id = ?';
+  const q2 = `
+  SELECT users.id as user_id,
+    products.id as product_id, products.name, products.description, products.price,
+    carts.amount, carts.totalAmount
+    FROM carts
+    INNER JOIN users ON
+    carts.user_id = users.id
+    INNER JOIN products ON
+    carts.product_id = products.id
+  `;
 
    try {
     connection = await getPool().getConnection();
-     const [result] = await connection.execute(q1, [productId]);
+     const [result] = await connection.execute(q1, [productId, userId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
      }  
