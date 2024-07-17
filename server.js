@@ -173,7 +173,7 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/cart-products', async (req, res) => {
   const q = `
-  SELECT users.id as userID,
+  SELECT users.id as user_id,
     products.id as product_id, products.name, products.description, products.price,
     carts.amount, carts.totalAmount
     FROM carts
@@ -313,7 +313,7 @@ app.put('/api/cart-products/:id', async (req, res) => {
   const query = 'UPDATE carts SET amount = ?, totalAmount = ? WHERE product_id = ? AND user_id = ?';
   const query1 = 'UPDATE carts SET totalAmount = ? WHERE product_id = ? AND user_id = ?';
   const q = `
-  SELECT users.id as userID,
+  SELECT users.id as user_id,
     products.id as product_id, products.name, products.description, products.price,
     carts.amount, carts.totalAmount
     FROM carts
