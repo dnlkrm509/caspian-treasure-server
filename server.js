@@ -285,7 +285,7 @@ app.post('/api/cart-products', async (req, res) => {
     VALUES (?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       amount = VALUES(amount),
-      total_amount = VALUES(total_amount)`;
+      totalAmount = VALUES(totalAmount)`;
 
   const values = [
     userId || user.id,
