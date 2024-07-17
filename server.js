@@ -172,6 +172,8 @@ app.get('/api/products', async (req, res) => {
 });
 
 app.get('/api/cart-products', async (req, res) => {
+  const { userId } = req.query;
+
   const q = `
   SELECT users.id as user_id,
     products.id as product_id, products.name, products.description, products.price,
@@ -181,13 +183,14 @@ app.get('/api/cart-products', async (req, res) => {
     carts.user_id = users.id
     INNER JOIN products ON
     carts.product_id = products.id
+    WHERE carts.user_id = ?
   `;
 
   let connection;
   
   try{
     connection = await getPool().getConnection();
-    const [rows, fields] = await connection.execute(q);
+    const [rows, fields] = await connection.execute(q, [userId ? userId : 11]);
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching data:', err.stack);
