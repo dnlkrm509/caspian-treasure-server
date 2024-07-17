@@ -272,33 +272,37 @@ app.post('/api/cart-products', async (req, res) => {
 
   let connection;
 
-  const productData = newProduct && newProduct.length > 0 ?
-  newProduct : { product_id: 8, amount: 0 };
+  // Ensure newProduct is an object even if it's empty
+  const productData = newProduct && newProduct.length > 0 ? newProduct : { product_id: 8, amount: 0 };
 
-  const query = `
-    INSERT INTO carts (
-      user_id,
-      product_id,
-      amount,
-      totalAmount
-    )
-    VALUES (?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE
-      amount = VALUES(amount),
-      totalAmount = VALUES(totalAmount)`;
-
-  const values = [
-    userId || user.id,
-    productData.product_id,
-    productData.amount,
-    totalAmount
-  ];
+  const userIdValue = userId || user.id;
+  const productIdValue = productData.product_id;
+  const amountValue = productData.amount;
+  const totalAmountValue = totalAmount;
 
   try {
     connection = await getPool().getConnection();
+    
+    // Check if the product already exists in the user's cart
+    const [existing] = await connection.execute(
+      `SELECT COUNT(*) AS count FROM carts WHERE user_id = ? AND product_id = ?`,
+      [userIdValue, productIdValue]
+    );
 
-    const [result] = await connection.execute(query, values);
-    console.log('Data inserted:', result);
+    if (existing[0].count > 0) {
+      // Update the existing cart item
+      const updateQuery = `
+        UPDATE carts
+        SET amount = amount + ?, totalAmount = totalAmount + ?
+        WHERE user_id = ? AND product_id = ?`;
+      await connection.execute(updateQuery, [amountValue, totalAmountValue, userIdValue, productIdValue]);
+    } else {
+      // Insert the new cart item
+      const insertQuery = `
+        INSERT INTO carts (user_id, product_id, amount, totalAmount)
+        VALUES (?, ?, ?, ?)`;
+      await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
+    }
 
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
