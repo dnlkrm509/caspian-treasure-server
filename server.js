@@ -271,7 +271,6 @@ app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
   let connection;
-  console.log(newProduct, userId, user, totalAmount)
 
   // Ensure newProduct is an object even if it's empty
   const productData = newProduct && newProduct.length > 0 ? newProduct : { product_id: 8, amount: 0 };
@@ -280,6 +279,9 @@ app.post('/api/cart-products', async (req, res) => {
   const productIdValue = productData.product_id;
   const amountValue = productData.amount;
   const totalAmountValue = totalAmount;
+
+  
+  console.log(productIdValue, amountValue, userIdValue, user, totalAmountValue)
 
   const insertQuery = `
       INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
