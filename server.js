@@ -281,7 +281,7 @@ app.post('/api/cart-products', async (req, res) => {
   const totalAmountValue = totalAmount;
 
   const insertQuery = `
-      INSERT INTO carts (user_id, product_id, amount, totalAmount)
+      INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
       VALUES (?, ?, ?, ?)`;
 
   try {
