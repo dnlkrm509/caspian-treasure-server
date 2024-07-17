@@ -280,7 +280,7 @@ app.post('/api/cart-products', async (req, res) => {
       user_id,
       product_id,
       amount,
-      total_amount
+      totalAmount
     )
     VALUES (?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
