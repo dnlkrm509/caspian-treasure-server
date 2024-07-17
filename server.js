@@ -286,7 +286,7 @@ app.post('/api/cart-products', async (req, res) => {
 
   try {
     connection = await getPool().getConnection();
-    console.log(insertQuery)
+    console.log([userIdValue, productIdValue, amountValue, totalAmountValue])
     
     await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
     res.status(200).json({ message: 'Cart product/(s) added!' });
