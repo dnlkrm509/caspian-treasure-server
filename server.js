@@ -271,6 +271,7 @@ app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
   let connection;
+  console.log(newProduct, userId, user, totalAmount)
 
   // Ensure newProduct is an object even if it's empty
   const productData = newProduct && newProduct.length > 0 ? newProduct : { product_id: 8, amount: 0 };
@@ -286,7 +287,6 @@ app.post('/api/cart-products', async (req, res) => {
 
   try {
     connection = await getPool().getConnection();
-    console.log([userIdValue, productIdValue, amountValue, totalAmountValue])
     
     await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
     res.status(200).json({ message: 'Cart product/(s) added!' });
