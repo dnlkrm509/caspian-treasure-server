@@ -350,7 +350,7 @@ app.delete('/api/cart-products/:id', async (req, res) => {
 
   let connection;
 
-  const q1 = 'DELETE FROM carts WHERE product_id = ? AND product_id = ?';
+  const q1 = 'DELETE FROM carts WHERE product_id = ? AND user_id = ?';
   const q2 = `
   SELECT users.id as user_id,
     products.id as product_id, products.name, products.description, products.price,
