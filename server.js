@@ -271,10 +271,10 @@ app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
   let connection;
-  
+
   const userIdValue = userId ? userId : user.id;
-  const productIdValue = productData.product_id ? productData.product_id : 8;
-  const amountValue = productData.amount ? productData.amount : 0;
+  const productIdValue = newProduct.product_id ? productData.product_id : 8;
+  const amountValue = newProduct.amount ? productData.amount : 0;
   const totalAmountValue = totalAmount;
 
   
