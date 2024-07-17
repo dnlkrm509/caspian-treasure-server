@@ -290,6 +290,7 @@ app.post('/api/cart-products', async (req, res) => {
     );
 
     if (existing[0].count > 0) {
+      console.log('existing')
       // Update the existing cart item
       const updateQuery = `
         UPDATE carts
@@ -297,6 +298,7 @@ app.post('/api/cart-products', async (req, res) => {
         WHERE user_id = ? AND product_id = ?`;
       await connection.execute(updateQuery, [amountValue, totalAmountValue, userIdValue, productIdValue]);
     } else {
+      console.log('new item')
       // Insert the new cart item
       const insertQuery = `
         INSERT INTO carts (user_id, product_id, amount, totalAmount)
