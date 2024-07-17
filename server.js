@@ -293,7 +293,7 @@ app.post('/api/cart-products', async (req, res) => {
       // Update the existing cart item
       const updateQuery = `
         UPDATE carts
-        SET amount = amount + ?, totalAmount = totalAmount + ?
+        SET amount = ?, totalAmount = ?
         WHERE user_id = ? AND product_id = ?`;
       await connection.execute(updateQuery, [amountValue, totalAmountValue, userIdValue, productIdValue]);
     } else {
