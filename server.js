@@ -285,8 +285,8 @@ app.post('/api/cart-products', async (req, res) => {
   }
 
   // Extract product_id and amount from the newProduct
-  const productIdValue = newProduct.product_id;
-  const amountValue = newProduct.amount;
+  const productIdValue = 8;
+  const amountValue = 0;
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
   console.log(newProduct, newProduct, userId, user, totalAmount)
