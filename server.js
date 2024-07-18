@@ -285,12 +285,11 @@ app.post('/api/cart-products', async (req, res) => {
   }
 
   // Extract product_id and amount from the newProduct
-  const productIdValue = 8;
-  const amountValue = 0;
+  const productIdValue = newProduct.product_id;
+  const amountValue = newProduct.amount;
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
-  console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
-
+  
   // Ensure all required fields are present and valid
   if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
     return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
