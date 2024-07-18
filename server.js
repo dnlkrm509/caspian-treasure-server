@@ -289,7 +289,7 @@ app.post('/api/cart-products', async (req, res) => {
   const amountValue = 0;
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
-  console.log(newProduct, newProduct, userId, user, totalAmount)
+  console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
 
   // Ensure all required fields are present and valid
   if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
