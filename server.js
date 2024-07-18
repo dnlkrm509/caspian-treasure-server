@@ -281,7 +281,30 @@ app.post('/api/cart-products', async (req, res) => {
   
   // Check if newProduct is an array or not properly structured
   if (!newProduct || !Array.isArray(newProduct)) {
-    return res.status(400).json({ message: 'Invalid request. newProduct must be a non-empty array.' });
+    const userIdValue = userId ? userId : user.id;
+    let connection;
+    try {
+      connection = await getPool().getConnection();
+      
+      // Delete all items from carts table for the given user
+      const deleteQuery = `
+        DELETE FROM carts
+        WHERE user_id = ?`;
+      
+      await connection.execute(deleteQuery, [userIdValue]);
+      
+      res.status(200).json({ message: 'Cart emptied!' });
+    } catch (err) {
+      console.error('Error deleting cart items:', err.stack);
+      res.status(500).json({ message: 'Failed to empty cart.' });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
+    
+    return; // Exit the function early
+
   }
   console.log(newProduct, newProduct[0].product_id, userId, user, totalAmount)
 
