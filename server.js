@@ -291,10 +291,9 @@ app.post('/api/cart-products', async (req, res) => {
   const userIdValue = userId ? userId : user.id;
 
 
-  console.log('user id :', userIdValue)
+  console.log(productIdValue, amountValue, totalAmount, userIdValue)
 
   let connection;
-  console.log('user id :', userIdValue)
 
   const insertQuery = `
       INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
