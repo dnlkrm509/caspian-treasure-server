@@ -290,6 +290,11 @@ app.post('/api/cart-products', async (req, res) => {
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
 
+  // If amountValue is 0, do nothing and silently exit
+  if (amountValue === 0) {
+    return res.status(200).json({ message: 'No action taken as amount is 0.' });
+  }
+
   // Check for missing required fields (specifically checking for undefined or null)
   if (productIdValue === undefined || productIdValue === null || 
     amountValue === undefined || amountValue === null || 
