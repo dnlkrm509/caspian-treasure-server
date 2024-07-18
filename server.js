@@ -283,11 +283,11 @@ app.post('/api/cart-products', async (req, res) => {
   if (!newProduct || !Array.isArray(newProduct)) {
     return res.status(400).json({ message: 'Invalid request. newProduct must be a non-empty array.' });
   }
-  console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
+  console.log(newProduct, newProduct[0].product_id, userId, user, totalAmount)
 
   // Extract product_id and amount from the first item in newProduct array
-  const productIdValue = newProduct.product_id;
-  const amountValue = newProduct.amount;
+  const productIdValue = newProduct[0].product_id;
+  const amountValue = newProduct[0].amount;
   const totalAmountValue = totalAmount;
   
   const userIdValue = userId ? userId : user.id;
