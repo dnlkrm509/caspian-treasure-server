@@ -279,6 +279,10 @@ app.post('/api/users', async (req, res) => {
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
+  if (!newProduct || !userId) {
+    return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
+  }
+
   let connection;
 
   const userIdValue = userId ? userId : user.id;
