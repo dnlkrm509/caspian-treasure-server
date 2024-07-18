@@ -278,18 +278,25 @@ app.post('/api/users', async (req, res) => {
 
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
-  console.log('Received POST request to add product to cart:', req.body);
+  
+  // Check if newProduct is an array or not properly structured
+  if (!newProduct || !Array.isArray(newProduct) || newProduct.length === 0) {
+    return res.status(400).json({ message: 'Invalid request. newProduct must be a non-empty array.' });
+  }
+
+  // Extract product_id and amount from the first item in newProduct array
+  const productIdValue = newProduct[0].product_id;
+  const amountValue = newProduct[0].amount;
+  const totalAmountValue = totalAmount;
+  
   const userIdValue = userId ? userId : user.id;
 
-  if (!newProduct || !userIdValue || userId === undefined || newProduct === undefined) {
+  // Ensure all required fields are present and valid
+  if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
     return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
   }
 
   let connection;
-
-  const productIdValue = newProduct.product_id;
-  const amountValue = newProduct.amount;
-  const totalAmountValue = totalAmount;
 
   const insertQuery = `
       INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
