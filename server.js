@@ -277,7 +277,7 @@ app.post('/api/users', async (req, res) => {
 });
 
 app.post('/api/cart-products', async (req, res) => {
-  const { newProduct, userId, user, totalAmount } = req.body;
+  const { newProduct, userId, user, cart, totalAmount } = req.body;
   
   // Check if newProduct is an array or not properly structured
   if (!newProduct) {
@@ -291,7 +291,7 @@ app.post('/api/cart-products', async (req, res) => {
   const userIdValue = userId ? userId : user.id;
 
   // If amountValue is 0, do nothing and silently exit
-  if (amountValue === 0) {
+  if (amountValue === 0 && cart) {
     return res.status(200).json({ message: 'No action taken as amount is 0.' });
   }
 
