@@ -302,9 +302,9 @@ app.post('/api/cart-products', async (req, res) => {
       VALUES (?, ?, ?, ?)`;
 
   try {
+    console.log(newProduct, userId, totalAmount)
     connection = await getPool().getConnection();
   
-    console.log(newProduct, userId, totalAmount)  
     await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
