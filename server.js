@@ -59,7 +59,7 @@ async function initializeDatabase() {
   CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    description VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
     price DECIMAL(6, 2) NOT NULL
   )`;
 
@@ -68,7 +68,7 @@ async function initializeDatabase() {
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL DEFAULT 'example@example.com' NOT NULL,
+    email VARCHAR(255) DEFAULT 'example@example.com' NOT NULL,
     address VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
     state VARCHAR(255) NOT NULL,
@@ -81,7 +81,7 @@ async function initializeDatabase() {
     product_id INT NOT NULL,
     user_id INT NOT NULL,
     amount INT NOT NULL,
-    totalAmount Decimal(7, 2) DEFAULT 0,
+    totalAmount DECIMAL(7, 2) DEFAULT 0,
     FOREIGN KEY(product_id) REFERENCES products(id),
     FOREIGN KEY(user_id) REFERENCES users(id),
     PRIMARY KEY(product_id, user_id)
@@ -191,6 +191,9 @@ app.get('/api/cart-products', async (req, res) => {
   try{
     connection = await getPool().getConnection();
     const [rows, fields] = await connection.execute(q, [userId ? userId : 11]);
+    if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching data:', err.stack);
@@ -211,6 +214,9 @@ app.get('/api/users', async (req, res) => {
   try{
     connection = await getPool().getConnection();
     const [rows, fields] = await connection.execute(q);
+    if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching users:', err.stack);
@@ -336,6 +342,9 @@ app.put('/api/cart-products/:id', async (req, res) => {
     }
     
     const [rows, fields] = await connection.execute(q, [ userId ]);
+    if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error updating data:', err.stack);
@@ -376,6 +385,9 @@ app.delete('/api/cart-products/:id', async (req, res) => {
 
      console.log('Data deleted:', result);
      const [rows, fields] = await connection.execute(q2, [userId]);
+     if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
      res.status(200).json({rows});
    } catch (err) {
      console.error('Error deleting data:', err.stack);
@@ -469,6 +481,9 @@ app.get('/api/orders', async (req, res) => {
   try{
     connection = await getPool().getConnection();
     const [rows, fields] = await connection.execute(q);
+    if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching orders:', err.stack);
@@ -619,10 +634,22 @@ app.post('/api/message-to', async (req, res) => {
 app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
 
+  const { userId } = req.body;
+
   let connection;
 
   const q1 = 'DELETE FROM carts WHERE product_id = ?';
-  const q2 = 'SELECT * FROM carts';
+  const q2 = `
+  SELECT users.id as user_id,
+    products.id as product_id, products.name, products.description, products.price,
+    carts.amount, carts.totalAmount
+    FROM carts
+    INNER JOIN users ON
+    carts.user_id = users.id
+    INNER JOIN products ON
+    carts.product_id = products.id
+    WHERE carts.user_id = ?
+  `;
 
    try {
     connection = await getPool().getConnection();
@@ -632,7 +659,10 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
      }
 
      console.log('Data deleted:', result);
-     const [rows, fields] = await connection.execute(q2);
+     const [rows, fields] = await connection.execute(q2, [userId]);
+     if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
      res.status(200).json({rows});
    } catch (err) {
      console.error('Error deleting data:', err.stack);
