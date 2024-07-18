@@ -279,10 +279,6 @@ app.post('/api/users', async (req, res) => {
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
   
-  // Check if newProduct is an array or not properly structured
-  if (!newProduct || !Array.isArray(newProduct) || newProduct.length === 0) {
-    return res.status(400).json({ message: 'Invalid request. newProduct must be a non-empty array.' });
-  }
   console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
 
   // Extract product_id and amount from the first item in newProduct array
