@@ -285,21 +285,11 @@ app.post('/api/cart-products', async (req, res) => {
   }
 
   // Extract product_id and amount from the newProduct
-  let productIdValue;
-  let amountValue;
-
-  if (Array.isArray(newProduct)) {
-    productIdValue = 8;
-    amountValue = 0;
-    console.log(newProduct, newProduct[0].product_id, userId, user, totalAmount)
-  } else {
-    productIdValue = newProduct.product_id;
-    amountValue = newProduct.amount;
-    console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
-  }
-
+  const productIdValue = newProduct.product_id;
+  const amountValue = newProduct.amount;
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
+  console.log(newProduct, newProduct, userId, user, totalAmount)
 
   // Ensure all required fields are present and valid
   if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
