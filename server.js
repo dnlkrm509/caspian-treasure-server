@@ -278,7 +278,7 @@ app.post('/api/users', async (req, res) => {
 
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
-
+  console.log('Received POST request to add product to cart:', req.body);
   const userIdValue = userId ? userId : user.id;
 
   if (!newProduct || !userIdValue || userId === undefined || newProduct === undefined) {
