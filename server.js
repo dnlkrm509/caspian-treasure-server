@@ -279,7 +279,7 @@ app.post('/api/users', async (req, res) => {
 app.post('/api/cart-products', async (req, res) => {
   const { newProduct, userId, user, totalAmount } = req.body;
 
-  console.log(newProduct, newProduct[0].product_id, userId, user, totalAmount)
+  console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
   
   // Check if newProduct is an array or not properly structured
   if (!newProduct || !Array.isArray(newProduct) || newProduct.length === 0) {
