@@ -172,12 +172,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 app.get('/api/cart-products', async (req, res) => {
-  const { userId } = req.query;
-
-  // If userId is not provided in query, respond with an error
-  if (!userId) {
-    return res.status(400).json({ message: 'Missing required userId in query parameters.' });
-  }
+  
 
   const q = `
   SELECT users.id as user_id,
@@ -188,19 +183,18 @@ app.get('/api/cart-products', async (req, res) => {
     carts.user_id = users.id
     INNER JOIN products ON
     carts.product_id = products.id
-    WHERE carts.user_id = ?
   `;
 
   let connection;
   
   try{
     connection = await getPool().getConnection();
-    const [rows, fields] = await connection.execute(q, [userId ]);
+    const [rows, fields] = await connection.execute(q);
     
     if (rows.length === 0) {
       return res.status(200).json({ rows: [] });
     }
-    
+
     res.status(200).json({rows});
   } catch (err) {
     console.error('Error fetching data:', err.stack);
