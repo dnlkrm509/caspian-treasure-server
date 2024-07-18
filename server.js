@@ -289,7 +289,8 @@ app.post('/api/cart-products', async (req, res) => {
   const amountValue = newProduct.amount;
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
-  
+
+  console.log(userIdValue)
 
   let connection;
 
@@ -298,9 +299,8 @@ app.post('/api/cart-products', async (req, res) => {
       VALUES (?, ?, ?, ?)`;
 
   try {
-    console.log(newProduct, userId, totalAmount)
     connection = await getPool().getConnection();
-  
+    
     await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
     res.status(200).json({ message: 'Cart product/(s) added!' });
   } catch (err) {
