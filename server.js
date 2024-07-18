@@ -190,7 +190,7 @@ app.get('/api/cart-products', async (req, res) => {
   
   try{
     connection = await getPool().getConnection();
-    const [rows, fields] = await connection.execute(q, [userId ? userId : 11]);
+    const [rows, fields] = await connection.execute(q, [userId ? userId : 12]);
     if (rows.length === 0) {
       return res.status(200).json({ rows: [] });
     }
