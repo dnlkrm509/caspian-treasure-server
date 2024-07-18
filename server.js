@@ -284,47 +284,45 @@ app.post('/api/cart-products', async (req, res) => {
     return res.status(400).json({ message: 'Invalid request. newProduct must be a non-empty array.' });
   }
 
-  // Extract product_id and amount from the first item in newProduct
+  // Extract product_id and amount from the newProduct
   let productIdValue;
   let amountValue;
 
   if (Array.isArray(newProduct)) {
-    productIdValue = newProduct[0].product_id;
-    amountValue = newProduct[0].amount;
-    console.log(newProduct, newProduct[0].product_id, userId, user, totalAmount)
+    return ;
   } else {
     productIdValue = newProduct.product_id;
     amountValue = newProduct.amount;
+    const totalAmountValue = totalAmount;
+    const userIdValue = userId ? userId : user.id;
     console.log(newProduct, newProduct.product_id, userId, user, totalAmount)
-  }
 
-  const totalAmountValue = totalAmount;
-  const userIdValue = userId ? userId : user.id;
-
-  // Ensure all required fields are present and valid
-  if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
-    return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
-  }
-
-  let connection;
-
-  const insertQuery = `
-      INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
-      VALUES (?, ?, ?, ?)`;
-
-  try {
-    connection = await getPool().getConnection();
-    
-    await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
-    res.status(200).json({ message: 'Cart product/(s) added!' });
-  } catch (err) {
-    console.error('Error inserting data:', err.stack);
-    res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
-  } finally {
-    if (connection) {
-      connection.release();
+    // Ensure all required fields are present and valid
+    if (!productIdValue || !amountValue || !userIdValue || !totalAmountValue) {
+      return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
     }
-  }
+
+    let connection;
+
+    const insertQuery = `
+        INSERT IGNORE INTO carts (user_id, product_id, amount, totalAmount)
+        VALUES (?, ?, ?, ?)`;
+
+    try {
+      connection = await getPool().getConnection();
+      
+      await connection.execute(insertQuery, [userIdValue, productIdValue, amountValue, totalAmountValue]);
+      res.status(200).json({ message: 'Cart product/(s) added!' });
+    } catch (err) {
+      console.error('Error inserting data:', err.stack);
+      res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
+    
+  }  
 });
 
 app.put('/api/cart-products/:id', async (req, res) => {
