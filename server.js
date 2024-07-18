@@ -290,8 +290,13 @@ app.post('/api/cart-products', async (req, res) => {
   const totalAmountValue = totalAmount;
   const userIdValue = userId ? userId : user.id;
 
-
-  console.log(productIdValue, amountValue, totalAmount, userIdValue)
+  // Check for missing required fields (specifically checking for undefined or null)
+  if (productIdValue === undefined || productIdValue === null || 
+    amountValue === undefined || amountValue === null || 
+    userIdValue === undefined || userIdValue === null || 
+    totalAmountValue === undefined || totalAmountValue === null) {
+  return res.status(400).json({ message: 'Invalid request. Missing required fields.' });
+}
 
   let connection;
 
