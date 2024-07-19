@@ -546,18 +546,25 @@ app.post('/api/customers', async (req, res) => {
 
 app.get('/api/orders', async (req, res) => {
   const q = `
-  SELECT users.name, users.email, users.address, users.city,
+  SELECT 
+    users.name, users.email, users.address, users.city,
     users.state, users.zip, users.country,
     orders.confirmation, orders.customer_id,
     order_detail.order_id, order_detail.product_id,
     products.name AS product_name, products.description, products.price,
     carts.totalAmount
-  FROM order_detail
-  INNER JOIN orders ON order_detail.order_id = orders.id
-  INNER JOIN customers ON orders.customer_id = customers.id
-  INNER JOIN users ON customers.user_id = users.id
-  INNER JOIN products ON order_detail.product_id = products.id
-  INNER JOIN carts ON users.id = carts.user_id
+FROM 
+    users
+LEFT JOIN 
+    customers ON users.id = customers.user_id
+LEFT JOIN 
+    orders ON customers.id = orders.customer_id
+LEFT JOIN 
+    order_detail ON orders.id = order_detail.order_id
+LEFT JOIN 
+    products ON order_detail.product_id = products.id
+LEFT JOIN 
+    carts ON users.id = carts.user_id;
   `;
 
   let connection;
