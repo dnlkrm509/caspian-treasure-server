@@ -675,7 +675,6 @@ app.post('/api/message-to', async (req, res) => {
 
 app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
-
   const { userId } = req.body;
 
   let connection;
@@ -698,7 +697,7 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
      const [result] = await connection.execute(q1, [productId, userId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
-     }
+     }  
 
      console.log('Data deleted:', result);
      const [rows, fields] = await connection.execute(q2, [userId]);
@@ -714,6 +713,7 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
       connection.release();
     }
    }
+  
 })
 
 initializeDatabase().then(() => {
