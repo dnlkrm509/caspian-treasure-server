@@ -552,12 +552,12 @@ app.get('/api/orders', async (req, res) => {
     order_detail.order_id, order_detail.product_id,
     products.name AS product_name, products.description, products.price,
     carts.totalAmount
-  FROM users
-  LEFT JOIN customers ON customers.user_id = users.id
-  LEFT JOIN orders ON orders.customer_id = customers.id
-  LEFT JOIN order_detail ON order_detail.order_id = orders.id
-  LEFT JOIN products ON order_detail.product_id = products.id
-  LEFT JOIN carts ON users.id = carts.user_id
+  FROM order_detail
+  INNER JOIN orders ON order_detail.order_id = orders.id
+  INNER JOIN customers ON orders.customer_id = customers.id
+  INNER JOIN users ON customers.user_id = users.id
+  INNER JOIN products ON order_detail.product_id = products.id
+  INNER JOIN carts ON users.id = carts.user_id
   `;
 
   let connection;
