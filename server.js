@@ -532,10 +532,10 @@ app.post('/api/customers', async (req, res) => {
     const [result] = await connection.execute(query, [userId]);
     console.log('Data inserted:', result);
     
-    res.status(200).json({ message: 'user added!' });
+    res.status(200).json({ message: 'customer added!' });
   } catch (err) {
-    console.error('Error inserting new user:', err.stack);
-    res.status(500).json({ message: 'Failed to add new user!' });
+    console.error('Error inserting new customer:', err.stack);
+    res.status(500).json({ message: 'Failed to add new customer!' });
   } finally {
     if (connection) {
       connection.release();
@@ -602,10 +602,10 @@ app.post('/api/orders', async (req, res) => {
     const [result] = await connection.execute(query, queryValues);
     console.log('Data inserted:', result);
     
-    res.status(200).json({ message: 'Cart product/(s) added!' });
+    res.status(200).json({ message: 'Order added!' });
   } catch (err) {
-    console.error('Error inserting data:', err.stack);
-    res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
+    console.error('Error inserting order:', err.stack);
+    res.status(500).json({ message: 'Failed to add order!' });
   } finally {
     if (connection) {
       connection.release();
@@ -636,9 +636,9 @@ app.post('/api/order-detail', async (req, res) => {
     const [result] = await connection.execute(query, queryValues);
     console.log('Data inserted:', result);
     
-    res.status(200).json({ message: 'Order is successfull' });
+    res.status(200).json({ message: 'Order added' });
   } catch (err) {
-    console.error('Error ordering:', err.stack);
+    console.error('Error inserting order:', err.stack);
     res.status(500).json({ message: 'Failed to order!' });
   } finally {
     if (connection) {
