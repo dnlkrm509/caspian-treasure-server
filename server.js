@@ -492,8 +492,73 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
+app.get('/api/customers', async (req, res) => {
+  const q = 'SELECT * FROM customers';
+
+  let connection;
+  
+  try{
+    connection = await getPool().getConnection();
+    const [rows, fields] = await connection.execute(q);
+    if (rows.length === 0) {
+      return res.status(200).json({ rows: [] });
+    }
+    res.status(200).json({rows});
+  } catch (err) {
+    console.error('Error fetching users:', err.stack);
+    res.status(500).json({err});
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+
+});
+
+app.post('/api/customers', async (req, res) => {
+  const { userId } = req.body;
+
+  let connection;
+
+  const query = `
+  INSERT INTO customers (
+    user_id
+  )
+  VALUES (?`;
+
+  try {
+    connection = await getPool().getConnection();
+    
+    const [result] = await connection.execute(query, [userId]);
+    console.log('Data inserted:', result);
+    
+    res.status(200).json({ message: 'user added!' });
+  } catch (err) {
+    console.error('Error inserting new user:', err.stack);
+    res.status(500).json({ message: 'Failed to add new user!' });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+  
+});
+
 app.get('/api/orders', async (req, res) => {
-  const q = 'SELECT * FROM orders';
+  const q = `
+  SELECT users.name, users.email, users.address, users.city,
+    users.state, users.zip, users.country,
+    orders.confirmation, orders.customer_id,
+    order_detail.order_id, order_detail.product_id,
+    products.name AS product_name, products.description, products.price,
+    carts.totalAmount
+FROM order_detail
+INNER JOIN orders ON order_detail.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN users ON customers.user_id = users.id
+INNER JOIN products ON order_detail.product_id = products.id
+INNER JOIN carts ON users.id = carts.user_id
+  `;
 
   let connection;
   
@@ -517,55 +582,58 @@ app.get('/api/orders', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   const {
-    newProduct,
-    orderId,
-    name,
-    email,
-    address,
-    city,
-    state,
-    zip,
-    country,
-    totalAmount } = req.body;
+    customerId,
+    confirmation,
+  } = req.body;
 
   let connection;
 
   const query = `
   INSERT INTO orders (
-    product_id,
-    product_name,
-    description,
-    amount,
-    price,
-    customer_name,
-    customer_email,
-    customer_address,
-    customer_city,
-    customer_state,
-    customer_zip,
-    customer_country,
-    order_id,
-    totalAmount
+    customer_id,
+    confirmation
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  const values = [
-    newProduct.product_id,
-    newProduct.name,
-    newProduct.description,
-    newProduct.amount,
-    newProduct.price,
-    name,
-    email,
-    address,
-    city,
-    state,
-    zip,
-    country
-  ];
+  VALUES (?, ?)`;
+
+  const queryValues = [customerId, confirmation ? confirmation : uuidv4()]
 
   try {
     connection = await getPool().getConnection();
-    const [result] = await connection.execute(query, [...values, orderId ? orderId : uuidv4(), totalAmount]);
+    const [result] = await connection.execute(query, queryValues);
+    console.log('Data inserted:', result);
+    
+    res.status(200).json({ message: 'Cart product/(s) added!' });
+  } catch (err) {
+    console.error('Error inserting data:', err.stack);
+    res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+  
+});
+
+app.post('/api/order-detail', async (req, res) => {
+  const {
+    newProduct,
+    orderId,
+  } = req.body;
+
+  let connection;
+
+  const query = `
+  INSERT IGNORE INTO order_detail (
+    order_id,
+    product_id
+  )
+  VALUES (?, ?)`;
+
+  const queryValues = [orderId, newProduct.product_id];
+
+  try {
+    connection = await getPool().getConnection();
+    const [result] = await connection.execute(query, queryValues);
     console.log('Data inserted:', result);
     
     res.status(200).json({ message: 'Cart product/(s) added!' });
@@ -582,18 +650,8 @@ app.post('/api/orders', async (req, res) => {
 
 app.post('/api/message-to', async (req, res) => {
   const {
-    name,
-    email,
-    orderId,
-    address,
-    city,
-    state,
-    zip,
-    product_id,
-    productName,
-    amount,
-    price,
-    totalAmount
+    productId,
+    customerId
   } = req.body;
 
   let connection;
@@ -601,36 +659,14 @@ app.post('/api/message-to', async (req, res) => {
   const q = `
   INSERT INTO message_to (
     subject,
-    customer_name,
-    email,
-    order_id,
-    address,
-    city,
-    state,
-    zip,
-    country,
     product_id,
-    product_name,
-    amount,
-    price,
-    totalAmount
+    customer_id
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  VALUES (?, ?, ?)`;
   const values = [
     `Order Confirmation`,
-    name,
-    email,
-    orderId,
-    address,
-    city,
-    state,
-    zip,
-    'United Kingdom',
-    product_id,
-    productName,
-    amount,
-    price,
-    totalAmount
+    productId,
+    customerId
   ];
 
   try {
@@ -657,7 +693,7 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
 
   let connection;
 
-  const q1 = 'DELETE FROM carts WHERE product_id = ?';
+  const q1 = 'DELETE FROM carts WHERE product_id = ? AND user_id = ?';
   const q2 = `
   SELECT users.id as user_id,
     products.id as product_id, products.name, products.description, products.price,
@@ -672,7 +708,7 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
 
    try {
     connection = await getPool().getConnection();
-     const [result] = await connection.execute(q1, [productId]);
+     const [result] = await connection.execute(q1, [productId, userId]);
      if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
      }
