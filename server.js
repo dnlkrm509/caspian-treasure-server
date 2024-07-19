@@ -676,7 +676,9 @@ app.post('/api/message-to', async (req, res) => {
 app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
   const { userId } = req.body;
-  console.log(productId, userId)
+
+  console.log('Product ID:', productId);
+  console.log('User ID:', userId);
 
   let connection;
 
@@ -693,29 +695,29 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
     WHERE carts.user_id = ?
   `;
 
-   try {
+  try {
     connection = await getPool().getConnection();
-     const [result] = await connection.execute(q1, [productId, userId]);
-     if (result.affectedRows === 0) {
+    const [result] = await connection.execute(q1, [productId, userId]);
+    console.log('Delete Result:', result);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
-     }  
+    }
 
-     console.log('Data deleted:', result);
-     const [rows, fields] = await connection.execute(q2, [userId]);
-     if (rows.length === 0) {
+    const [rows, fields] = await connection.execute(q2, [userId]);
+    console.log('Query Result:', rows);
+    if (rows.length === 0) {
       return res.status(200).json({ rows: [] });
     }
-     res.status(200).json({rows});
-   } catch (err) {
-     console.error('Error deleting data:', err.stack);
-     res.status(500).json({ message: 'Internal Server Error' });
-   } finally {
+    res.status(200).json({ rows });
+  } catch (err) {
+    console.error('Error deleting data:', err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
+  } finally {
     if (connection) {
       connection.release();
     }
-   }
-  
-})
+  }
+});
 
 initializeDatabase().then(() => {
   const PORT = process.env.PORT || 5000;
