@@ -545,27 +545,7 @@ app.post('/api/customers', async (req, res) => {
 });
 
 app.get('/api/orders', async (req, res) => {
-  const q = `
-    SELECT 
-      users.name, users.email, users.address, users.city,
-      users.state, users.zip, users.country,
-      orders.confirmation, orders.customer_id,
-      order_detail.order_id, order_detail.product_id,
-      products.name AS product_name, products.description, products.price,
-      carts.totalAmount
-    FROM 
-      users
-    LEFT JOIN 
-      customers ON users.id = customers.user_id
-    LEFT JOIN 
-      orders ON customers.id = orders.customer_id
-    LEFT JOIN 
-      order_detail ON orders.id = order_detail.order_id
-    LEFT JOIN 
-      products ON order_detail.product_id = products.id
-    LEFT JOIN 
-      carts ON users.id = carts.user_id;
-  `;
+  const q = `SELECT * FROM orders`;
 
   let connection;
   
