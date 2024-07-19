@@ -99,7 +99,7 @@ async function initializeDatabase() {
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     confirmation VARCHAR(36) NOT NULL,
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
+    FOREIGN KEY(customer_id) REFERENCES customers(user_id)
   )`;
 
   const q5 = `
