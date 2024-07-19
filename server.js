@@ -61,20 +61,20 @@ async function initializeDatabase() {
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     price DECIMAL(6, 2) NOT NULL
-  )`;
+  );`;
 
   const q1 = `
   CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) DEFAULT 'example@example.com' NOT NULL,
+    email VARCHAR(255) NOT NULL DEFAULT 'example@example.com',
     address VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
     state VARCHAR(255) NOT NULL,
     zip VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL
-  )`;
+  );`;
 
   const q2 = `
   CREATE TABLE IF NOT EXISTS carts (
@@ -85,22 +85,22 @@ async function initializeDatabase() {
     FOREIGN KEY(product_id) REFERENCES products(id),
     FOREIGN KEY(user_id) REFERENCES users(id),
     PRIMARY KEY(product_id, user_id)
-  )`;
+  );`;
 
   const q3 = `
   CREATE TABLE IF NOT EXISTS customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id)
-  )`;
+  );`;
 
   const q4 = `
   CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     confirmation VARCHAR(36) NOT NULL,
-    FOREIGN KEY(customer_id) REFERENCES customers(user_id)
-  )`;
+    FOREIGN KEY(customer_id) REFERENCES customers(id)
+  );`;
 
   const q5 = `
   CREATE TABLE IF NOT EXISTS order_detail (
@@ -108,7 +108,7 @@ async function initializeDatabase() {
     product_id INT NOT NULL,
     FOREIGN KEY(order_id) REFERENCES orders(id),
     FOREIGN KEY(product_id) REFERENCES products(id)
-  )`;
+  );`;
 
   const q6 = `
   CREATE TABLE IF NOT EXISTS message_from (
@@ -117,7 +117,7 @@ async function initializeDatabase() {
     from_name VARCHAR(255) NOT NULL,
     from_email VARCHAR(255) NOT NULL,
     message VARCHAR(255) NOT NULL
-  )`;
+  );`;
 
   const q7 = `
   CREATE TABLE IF NOT EXISTS message_to (
@@ -127,7 +127,7 @@ async function initializeDatabase() {
     FOREIGN KEY(product_id) REFERENCES products(id),
     FOREIGN KEY(customer_id) REFERENCES customers(id),
     PRIMARY KEY(product_id, customer_id)
-  )`;
+  );`;
   
   let connection;
   try {
@@ -546,39 +546,39 @@ app.post('/api/customers', async (req, res) => {
 
 app.get('/api/orders', async (req, res) => {
   const q = `
-  SELECT 
-    users.name, users.email, users.address, users.city,
-    users.state, users.zip, users.country,
-    orders.confirmation, orders.customer_id,
-    order_detail.order_id, order_detail.product_id,
-    products.name AS product_name, products.description, products.price,
-    carts.totalAmount
-FROM 
-    users
-LEFT JOIN 
-    customers ON users.id = customers.user_id
-LEFT JOIN 
-    orders ON customers.id = orders.customer_id
-LEFT JOIN 
-    order_detail ON orders.id = order_detail.order_id
-LEFT JOIN 
-    products ON order_detail.product_id = products.id
-LEFT JOIN 
-    carts ON users.id = carts.user_id;
+    SELECT 
+      users.name, users.email, users.address, users.city,
+      users.state, users.zip, users.country,
+      orders.confirmation, orders.customer_id,
+      order_detail.order_id, order_detail.product_id,
+      products.name AS product_name, products.description, products.price,
+      carts.totalAmount
+    FROM 
+      users
+    LEFT JOIN 
+      customers ON users.id = customers.user_id
+    LEFT JOIN 
+      orders ON customers.id = orders.customer_id
+    LEFT JOIN 
+      order_detail ON orders.id = order_detail.order_id
+    LEFT JOIN 
+      products ON order_detail.product_id = products.id
+    LEFT JOIN 
+      carts ON users.id = carts.user_id;
   `;
 
   let connection;
   
-  try{
+  try {
     connection = await getPool().getConnection();
     const [rows, fields] = await connection.execute(q);
     if (rows.length === 0) {
       return res.status(200).json({ rows: [] });
     }
-    res.status(200).json({rows});
+    res.status(200).json({ rows });
   } catch (err) {
     console.error('Error fetching orders:', err.stack);
-    res.status(500).json({err});
+    res.status(500).json({ err });
   } finally {
     if (connection) {
       connection.release();
