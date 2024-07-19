@@ -524,7 +524,7 @@ app.post('/api/customers', async (req, res) => {
   INSERT INTO customers (
     user_id
   )
-  VALUES (?`;
+  VALUES (?)`;
 
   try {
     connection = await getPool().getConnection();
@@ -636,10 +636,10 @@ app.post('/api/order-detail', async (req, res) => {
     const [result] = await connection.execute(query, queryValues);
     console.log('Data inserted:', result);
     
-    res.status(200).json({ message: 'Cart product/(s) added!' });
+    res.status(200).json({ message: 'Order is successfull' });
   } catch (err) {
-    console.error('Error inserting data:', err.stack);
-    res.status(500).json({ message: 'Failed to add product/(s) to cart!' });
+    console.error('Error ordering:', err.stack);
+    res.status(500).json({ message: 'Failed to order!' });
   } finally {
     if (connection) {
       connection.release();
