@@ -125,7 +125,7 @@ async function initializeDatabase() {
     customer_id INT NOT NULL,
     product_id INT NOT NULL,
     FOREIGN KEY(product_id) REFERENCES products(id),
-    FOREIGN KEY(customer_id) REFERENCES customers(id),
+    FOREIGN KEY(customer_id) REFERENCES users(id),
     PRIMARY KEY(product_id, customer_id)
   );`;
   
