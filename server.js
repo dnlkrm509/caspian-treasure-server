@@ -677,9 +677,6 @@ app.delete('/api/all-cart-products/:id', async (req, res) => {
   const productId = req.params.id;
   const { userId } = req.body;
 
-  console.log('Product ID:', productId);
-  console.log('User ID:', userId);
-
   let connection;
 
   const q1 = 'DELETE FROM carts WHERE product_id = ? AND user_id = ?';
