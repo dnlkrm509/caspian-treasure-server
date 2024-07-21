@@ -173,7 +173,6 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/cart-products/:userId', async (req, res) => {
   const userId = req.params.userId;
-  console.log('user id:', userId)
   
   const q = `
   SELECT users.id as user_id,
