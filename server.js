@@ -376,9 +376,8 @@ app.put('/api/cart-products/:id', async (req, res) => {
 
 });
 
-app.delete('/api/cart-products/:id', async (req, res) => {
-  const productId = req.params.id;
-  const { userId } = req.body;
+app.delete('/api/cart-products/:userId/:productId', async (req, res) => {
+  const { userId, productId } = req.params;
 
   let connection;
 
@@ -673,9 +672,8 @@ app.post('/api/message-to', async (req, res) => {
   
 });
 
-app.delete('/api/all-cart-products/:id', async (req, res) => {
-  const productId = req.params.id;
-  const { userId } = req.body;
+app.delete('/api/all-cart-products/:userId/:productId', async (req, res) => {
+  const { userId, productId } = req.params;
 
   let connection;
 
