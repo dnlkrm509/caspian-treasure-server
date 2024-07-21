@@ -171,7 +171,9 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.get('/api/cart-products', async (req, res) => {
+app.get('/api/cart-products/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  console.log('user id:', userId)
   
   const q = `
   SELECT users.id as user_id,
@@ -182,13 +184,14 @@ app.get('/api/cart-products', async (req, res) => {
     carts.user_id = users.id
     INNER JOIN products ON
     carts.product_id = products.id
+    WHERE users.id = ?
   `;
 
   let connection;
   
   try{
     connection = await getPool().getConnection();
-    const [rows, fields] = await connection.execute(q);
+    const [rows, fields] = await connection.execute(q, [userId]);
     
     if (rows.length === 0) {
       return res.status(200).json({ rows: [] });
