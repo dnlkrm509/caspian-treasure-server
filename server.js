@@ -19,7 +19,7 @@ function getPool() {
       database: process.env.MYSQL_DATABASE,
       port: process.env.MYSQL_PORT,
       ssl: {
-        rejectUnauthorized: true
+        rejectUnauthorized: false
       },
       connectionLimit: 35,  // Set an appropriate connection limit
       queueLimit: 0
